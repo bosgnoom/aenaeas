@@ -120,19 +120,19 @@ def image_ok(bestand):
     """
 
     # Check if processed file exists
-    folder, file = os.path.split(bestand)
-    if os.path.exists('processed_{}/{}'.format(folder, file)):
-        return False, None
+    #folder, file = os.path.split(bestand)
+    # if os.path.exists('processed_{}/{}'.format(folder, file)):
+    #    return False, None
 
-    # Check file size
+    # Check file size, skip empty files
     if os.path.getsize(bestand) == 0:
         return False, None
 
-    # Now check averaged brightness, too low == dark == not OK
+    # Check averaged brightness, too low == dark == not OK
     im = Image.open(bestand).convert('L')
     stat = ImageStat.Stat(im)
     brightness = stat.mean[0]
-    if brightness < 75:         # 50 is arbitrair gekozen
+    if brightness < 80:         # 50 is arbitrair gekozen
         return False, None
 
     # If all OK:
@@ -161,18 +161,36 @@ def main(folder, framerate):
     # Determine which images to process
     # Make slices for each image to process, each including
     # which images to use in the averaged frame
-    slices = [images[i:i + HOW_MUCH]
-              for i, _ in enumerate(images)]
+    frames_needed = 0.5 * 60 * framerate + HOW_MUCH  # Now 1 minute animation
+    step_size = int(round(len(images) / frames_needed))
+    print("Amount of raw images: {}".format(len(images_checked)))
+    print("Amount of frames available: {}".format(len(images)))
+    print("Amount of frames needed: {}".format(frames_needed))
+    print("Step size: {}".format(step_size))
+
+    # Make a new list of images, which does not contain skipped images
+    selected_images = []
+    for i in range(0, len(images), step_size):
+        selected_images.append(images[i])
+    print("Amount of selected images: {}".format(len(selected_images)))
+
+    slices = [selected_images[i:i + HOW_MUCH]
+              for i, _ in enumerate(selected_images)]
 
     # Create folder for processed images
     directory = 'processed_{}'.format(folder)
     if not os.path.exists(directory):
         os.makedirs(directory)
 
+    # Clear all old images
+    old_files = glob.glob('{}/*.jpg'.format(directory))
+    for f in old_files:
+        os.remove(f)
+
     # Process images (using multiple processes,
     # as 'convert' is single threaded
     print("Starting convert_image for selected images...")
-    process_map(convert_image, slices, chunksize=1)
+    process_map(convert_image, slices, chunksize=2)
 
     # Use images for timelapse video
     print("Invoking ffmpeg to process images into video...")
