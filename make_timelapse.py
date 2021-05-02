@@ -22,7 +22,6 @@ import glob
 import os
 import datetime
 from tqdm.contrib.concurrent import process_map
-from tqdm import tqdm
 from PIL import Image, ImageStat
 
 
@@ -190,7 +189,7 @@ def main(folder, framerate):
     # Process images (using multiple processes,
     # as 'convert' is single threaded
     print("Starting convert_image for selected images...")
-    process_map(convert_image, slices, chunksize=2)
+    process_map(convert_image, slices, chunksize=4)
 
     # Use images for timelapse video
     print("Invoking ffmpeg to process images into video...")
@@ -200,5 +199,5 @@ def main(folder, framerate):
 
 
 if __name__ == "__main__":
-    main('img', 60)
-    main('img_cam2', 60)
+    main('img', 30)
+    main('img_cam2', 30)
