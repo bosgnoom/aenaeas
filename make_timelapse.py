@@ -26,7 +26,7 @@ from PIL import Image, ImageStat
 
 
 # How much images to average
-HOW_MUCH = 20
+HOW_MUCH = 12
 
 
 def convert_image(welke):
@@ -118,11 +118,6 @@ def image_ok(bestand):
         Only process images which are OK
     """
 
-    # Check if processed file exists
-    #folder, file = os.path.split(bestand)
-    # if os.path.exists('processed_{}/{}'.format(folder, file)):
-    #    return False, None
-
     # Check file size, skip empty files
     if os.path.getsize(bestand) == 0:
         return False, None
@@ -151,7 +146,7 @@ def main(folder, framerate):
     # First, evaluate whether the image is ok (not already processed and light enough)
     images_checked = process_map(
         image_ok, glob.glob('{}/*.jpg'.format(folder)), chunksize=4)
-    # Now put images to process in a queue
+    # Now put images to process in a new list
     images = [os.path.split(file) for flag, file in images_checked if flag]
 
     # Sort by number (2nd field in 'images')
@@ -160,7 +155,7 @@ def main(folder, framerate):
     # Determine which images to process
     # Make slices for each image to process, each including
     # which images to use in the averaged frame
-    frames_needed = 0.5 * 60 * framerate + HOW_MUCH  # Now 1 minute animation
+    frames_needed = 0.5 * 60 * framerate + HOW_MUCH  # Now 30 seconds of animation
     step_size = int(round(len(images) / frames_needed))
     print("Amount of raw images: {}".format(len(images_checked)))
     print("Amount of frames available: {}".format(len(images)))
@@ -199,5 +194,5 @@ def main(folder, framerate):
 
 
 if __name__ == "__main__":
-    main('img', 30)
-    main('img_cam2', 30)
+    main('img', 24)
+    main('img_cam2', 24)
