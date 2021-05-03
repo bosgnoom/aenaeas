@@ -23,6 +23,7 @@ import os
 import datetime
 from tqdm.contrib.concurrent import process_map
 from PIL import Image, ImageStat
+import requests
 
 
 # How much images to average
@@ -123,10 +124,13 @@ def image_ok(bestand):
         return False, None
 
     # Check averaged brightness, too low == dark == not OK
-    im = Image.open(bestand).convert('L')
-    stat = ImageStat.Stat(im)
-    brightness = stat.mean[0]
-    if brightness < 80:         # 50 is arbitrair gekozen
+    url = 'http://localhost:5000/brightness'
+    image = {'image': open(bestand, 'rb')}
+
+    r = requests.post(url, files=image)
+
+    brightness = r.json()["brightness"]
+    if brightness < 90:         # 50 is arbitrair gekozen
         return False, None
 
     # If all OK:
@@ -145,7 +149,10 @@ def main(folder, framerate):
     print("Scanning {} directory for pictures...".format(folder))
     # First, evaluate whether the image is ok (not already processed and light enough)
     images_checked = process_map(
-        image_ok, glob.glob('{}/*.jpg'.format(folder)), chunksize=4)
+        image_ok, glob.glob('{}/*.jpg'.format(folder)), chunksize=1)
+    print(images_checked)
+    exit(0)
+    
     # Now put images to process in a new list
     images = [os.path.split(file) for flag, file in images_checked if flag]
 
@@ -195,4 +202,4 @@ def main(folder, framerate):
 
 if __name__ == "__main__":
     main('img', 24)
-    main('img_cam2', 24)
+    #main('img_cam2', 24)
