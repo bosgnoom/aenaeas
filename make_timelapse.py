@@ -22,26 +22,39 @@ import glob
 import os
 import datetime
 from tqdm.contrib.concurrent import process_map
-from PIL import Image, ImageStat
 import requests
 
 
 # How much images to average
-HOW_MUCH = 12
+HOW_MUCH = 2
 
 
-def convert_image(welke):
+def convert_image(image_set):
     """
     convert yyyy-mm-dd_HHMM.png to <timestamp>
     use convert to process it into an averaged frame and embedding the date/time
+
+    https://jdhao.github.io/2020/04/12/build_webapi_with_flask_s2/
     """
 
-    # welke is a list containing the images to process
+    # image_set is a list containing the images to process
     # To determine the timestamp, take the first image and remove its file extension
-    timestamp = welke[0][1].replace('.jpg', '')
+    timestamp = image_set[0][1].replace('.jpg', '')
     tijdstip = datetime.datetime.strptime(
         timestamp, "%Y-%m-%d_%H%M").strftime('%d-%m-%Y %H:%M')
 
+    # Add each image to a list, to be send to image_processor_server
+    images = [('image', open('{}/{}'.format(folder, filename), 'rb'))
+              for folder, filename in image_set]
+
+    url = 'http://localhost:5000/average'
+    r = requests.post(url, files=images)
+    
+    with open('processed_{}/{}'.format(image_set[0][0], image_set[0][1]), 'wb') as f:
+        f.write(r.content)
+    exit(0)
+
+    """
     # Prepare "convert" command
     command = []
     command.append('/usr/bin/convert')
@@ -70,6 +83,7 @@ def convert_image(welke):
     result = os.system(command)
     if (result != os.EX_OK):
         print("There was an error processing 'convert' !")
+    """
 
 
 def make_movie(folder, frames):
@@ -130,8 +144,8 @@ def image_ok(bestand):
     r = requests.post(url, files=image)
 
     brightness = r.json()["brightness"]
-    if brightness < 90:         # 50 is arbitrair gekozen
-        return False, None
+    # if brightness < 90:         # 50 is arbitrair gekozen
+    #    return False, None
 
     # If all OK:
     return True, bestand
@@ -150,9 +164,7 @@ def main(folder, framerate):
     # First, evaluate whether the image is ok (not already processed and light enough)
     images_checked = process_map(
         image_ok, glob.glob('{}/*.jpg'.format(folder)), chunksize=1)
-    print(images_checked)
-    exit(0)
-    
+
     # Now put images to process in a new list
     images = [os.path.split(file) for flag, file in images_checked if flag]
 
@@ -163,7 +175,7 @@ def main(folder, framerate):
     # Make slices for each image to process, each including
     # which images to use in the averaged frame
     frames_needed = 0.5 * 60 * framerate + HOW_MUCH  # Now 30 seconds of animation
-    step_size = int(round(len(images) / frames_needed))
+    step_size = max(int(round(len(images) / frames_needed)), 1)
     print("Amount of raw images: {}".format(len(images_checked)))
     print("Amount of frames available: {}".format(len(images)))
     print("Amount of frames needed: {}".format(frames_needed))
@@ -191,8 +203,10 @@ def main(folder, framerate):
     # Process images (using multiple processes,
     # as 'convert' is single threaded
     print("Starting convert_image for selected images...")
-    process_map(convert_image, slices, chunksize=4)
+    #process_map(convert_image, slices, chunksize=1)
+    convert_image(slices[0])
 
+    exit(0)
     # Use images for timelapse video
     print("Invoking ffmpeg to process images into video...")
     make_movie(folder, framerate)
@@ -201,5 +215,5 @@ def main(folder, framerate):
 
 
 if __name__ == "__main__":
-    main('img', 24)
-    #main('img_cam2', 24)
+    main('test', 20)
+    main('img_cam2', 20)
