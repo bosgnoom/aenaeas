@@ -8,7 +8,7 @@ ENV PATH="$VIRTUAL_ENV/bin:$PATH"
 
 RUN apt-get update && \
     apt-get install -y \
-    libatlas3-base libgfortran5
+    libatlas3-base libgfortran5 \
     libjbig0 liblcms2-2 libopenjp2-7 libtiff5 libwebp6 libwebpdemux2 libwebpmux3
 
 RUN pip install --upgrade pip --extra-index-url https://www.piwheels.org/simple
