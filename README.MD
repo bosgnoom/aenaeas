@@ -15,4 +15,11 @@ Docker op mijn rpi3 geinstalleerd, volgens de info van [docker](https://docs.doc
 
 Daarna op rpi3 een docker registry aangemaakt, op dit moment wil ik liever niet op docker hub iets gaan uploaden... `sudo docker run -d -p 5000:5000 --restart=always --name registry registry:2`
 
-Eerste test, volgens [Deploy a registry server](https://docs.docker.com/registry/deploying/) met `docker pull python:3.9.5-slim-buster`. 
+Eerste test, volgens [Deploy a registry server](https://docs.docker.com/registry/deploying/) met `docker pull python:3.9.5-slim-buster`. Lijkt goed te werken
+
+**Dockerfile** Is lastiger dan wat ik dacht. Het installeren van numpy, PIL en Flask levert problemen op. Ik probeer een andere route: deze via apt-get installeren. `docker build --tag testje .`
+
+Dat ziet er goed uit. Nu proberen te starten: `docker run -it testje`. Flask wordt niet gevonden...
+Ik neem een kijkje in de container: `docker run -it testje /bin/bash`. Nieuwe poging door venv te gebruiken. Pip install werkt nu wel, helaas niet via piwheels. Na een hele lange tijd is de container klaar. Nu start _image_procesor_server_ wel op.
+
+
