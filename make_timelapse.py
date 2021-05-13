@@ -29,7 +29,7 @@ import requests
 HOW_MUCH = 2
 
 # Image processor URL
-IMG_PROC = 'http://192.168.178.15:8000'
+IMG_PROC = 'http://192.168.178.200:6000'
 
 
 def convert_image(image_set):
@@ -55,7 +55,6 @@ def convert_image(image_set):
     
     with open('processed_{}/{}'.format(image_set[0][0], image_set[0][1]), 'wb') as f:
         f.write(r.content)
-    exit(0)
 
     """
     # Prepare "convert" command
@@ -218,5 +217,5 @@ def main(folder, framerate):
 
 
 if __name__ == "__main__":
-    main('test', 20)
+    main('img', 20)
     main('img_cam2', 20)

@@ -37,6 +37,28 @@ Docker image testrun op rpi3: `docker run -p 8000:8000 img_proc`. In make_timela
 Via mijn andere project, ansible-pis, is kubernetes geinstalleerd op een drietal raspberry pi's. Het zouden er meer kunnen/mogen zijn, maar dat mag de pret niet drukken...
 
 Op rpi3 is een docker registry geinstalleerd. Via de Dockerfile een image gemaakt. Image naar eigen registry toegeduwd.
-Dit is een niet beveiligde registry. Later nog eens kijken hoe te beveiligen... 
+Dit is een niet beveiligde registry. Bij [Rancher](https://rancher.com/docs/k3s/latest/en/installation/private-registry/) staat een hint hoe een registry geconfigureerd moet worden. Helaas krijg ik dit niet aan de gang, dus... 
 
-Bij [Rancher](https://rancher.com/docs/k3s/latest/en/installation/private-registry/) staat een hint hoe een registry geconfigureerd moet worden. Dat eerst maar eens doen.
+### Docker registry TLS versie
+
+Terug naar de tekentafel... Ik pak de [uitleg](https://docs.docker.com/registry/deploying/#run-an-externally-accessible-registry) van Docker zelf op. 
+Daarvoor heb ik een certificaat nodig. Ik heb geen eigen hostname, dus via openssl zelf een [certificaat](https://docs.docker.com/registry/insecure/#use-self-signed-certificates) maken:
+`openssl ...`. Docker registry opnieuw aangemaakt, deze keer met certificaten. Eerst img_proc verwijderd, daarna opnieuw getagged en gepushed.
+
+Kubernetes krijg ik nog niet aan de gang, kubectl describe pod ... geeft aan dat het certificaat getekend is door een onbekende. Nu certificaat naar master node gekopieerd, daarna update-ca-certificates gedraaid. Nu ff afwachten of ie het nu wel pakt... Niet dus... 
+
+Oplossing gevonden: eerst containerd proberen te voorzien van de certificaten, in /etc/rancher/registries.yaml. Bleek niet te werken, de configuratie veranderen naar:
+```
+mirrors:
+  docker.io:
+    endpoint:
+      - "https://192.168.178.15:5000"
+
+configs:
+  "192.168.178.15:5000":
+    tls:
+      insecure_skip_verify: true
+```
+
+Gaf een beter resultaat. In de deployment.yaml `image: 192.168.178.15:5000/img_proc:latest` veranderd: de `:latest` was nodig. Hiermee kon de boel gestart worden.
+
