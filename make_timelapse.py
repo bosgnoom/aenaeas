@@ -28,6 +28,9 @@ import requests
 # How much images to average
 HOW_MUCH = 2
 
+# Image processor URL
+IMG_PROC = 'http://192.168.178.15:8000'
+
 
 def convert_image(image_set):
     """
@@ -47,7 +50,7 @@ def convert_image(image_set):
     images = [('image', open('{}/{}'.format(folder, filename), 'rb'))
               for folder, filename in image_set]
 
-    url = 'http://localhost:5000/average'
+    url = '{}/average'.format(IMG_PROC)
     r = requests.post(url, files=images)
     
     with open('processed_{}/{}'.format(image_set[0][0], image_set[0][1]), 'wb') as f:
@@ -138,7 +141,7 @@ def image_ok(bestand):
         return False, None
 
     # Check averaged brightness, too low == dark == not OK
-    url = 'http://localhost:5000/brightness'
+    url = '{}/brightness'.format(IMG_PROC)
     image = {'image': open(bestand, 'rb')}
 
     r = requests.post(url, files=image)
