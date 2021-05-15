@@ -30,3 +30,4 @@ test/2021-04-26_0017.jpg
 test/2021-04-26_0018.jpg
 test/2021-04-26_0019.jpg
 test/2021-04-26_0020.jpg
+docker_registry/*
