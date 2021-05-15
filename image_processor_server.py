@@ -8,14 +8,15 @@
 
     depends on:
     - flask: pip install flask
-    - PIL
+    - PIL (Pillow)
     
 """
 
 from flask import Flask, request, jsonify, send_file
-from PIL import Image, ImageStat
+from PIL import Image, ImageStat, ImageFont, ImageDraw
 import numpy as np
 from io import BytesIO
+import datetime
 
 
 app = Flask(__name__)
@@ -42,14 +43,19 @@ def process_images():
     files = request.files.getlist('image')
     app.logger.info("Amount of images in list: {}".format(len(files)))
 
+    # Get first image's filename
+    result_name = files[0].filename
+    # To determine the timestamp, take the first image name and remove its file extension
+    timestamp = result_name.split('.')[0]
+    # Return images as PNG
+    result_name = f'{timestamp}.png'
+
+    app.logger.debug('Filename: {}'.format(result_name))
+
     # Empty array to store image
     arr = np.zeros(shape=(720, 1280, 3))
 
-    # Get first image's filename
-    result_name = files[0].filename
-    app.logger.debug('Filename: {}'.format(result_name))
-
-    # Loop over each file
+    # Loop over each file, store in array created above
     for f in files:
         # Open image
         img = Image.open(f.stream)
@@ -72,10 +78,18 @@ def process_images():
     # Reduce arr to normal color levels, by dividing through amount of images
     img_avg = np.array(arr / len(files), dtype=np.uint8)
 
-    # From array to an image
+    # Convert array to an image
     img_avg = Image.fromarray(img_avg)
 
+    # Embed timestamp in image
+    tijdstip = datetime.datetime.strptime(
+        timestamp, "%Y-%m-%d_%H%M").strftime('%d-%m-%Y %H:%M')
+    font = ImageFont.truetype('OpenSans-Regular.ttf', 20)
+    d1 = ImageDraw.Draw(img_avg)
+    d1.text((1120, 694), tijdstip, font=font, fill=(255, 255, 255))
+
     # Prepare to send the image back to client
+    app.logger.debug('Send image back to client')
     img_byte_arr = BytesIO()
     img_avg.save(img_byte_arr, format='PNG')
     img_byte_arr.seek(0)
@@ -87,4 +101,4 @@ def process_images():
 
 
 if __name__ == "__main__":
-    app.run(debug=True, host='0.0.0.0', port=8000)
+    app.run(debug=False, host='0.0.0.0', port=8000)

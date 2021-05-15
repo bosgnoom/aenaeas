@@ -18,6 +18,7 @@ RUN pip install --extra-index-url https://www.piwheels.org/simple numpy Flask Pi
 WORKDIR $VIRTUAL_ENV
 
 COPY image_processor_server.py .
+COPY OpenSans-Regular.ttf .
 
 EXPOSE 8000
 
