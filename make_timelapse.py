@@ -26,10 +26,10 @@ import requests
 
 
 # How much images to average
-HOW_MUCH = 2
+HOW_MUCH = 5
 
 # Image processor URL
-IMG_PROC = 'http://192.168.178.200:6000'
+IMG_PROC = 'http://192.168.178.202:6000'
 
 
 def convert_image(image_set):
@@ -52,7 +52,7 @@ def convert_image(image_set):
 
     url = '{}/average'.format(IMG_PROC)
     r = requests.post(url, files=images)
-    
+
     with open('processed_{}/{}'.format(image_set[0][0], image_set[0][1]), 'wb') as f:
         f.write(r.content)
 
@@ -146,8 +146,8 @@ def image_ok(bestand):
     r = requests.post(url, files=image)
 
     brightness = r.json()["brightness"]
-    # if brightness < 90:         # 50 is arbitrair gekozen
-    #    return False, None
+    if brightness < 90:         # 50 is arbitrair gekozen
+        return False, None
 
     # If all OK:
     return True, bestand
@@ -176,7 +176,7 @@ def main(folder, framerate):
     # Determine which images to process
     # Make slices for each image to process, each including
     # which images to use in the averaged frame
-    frames_needed = 0.5 * 60 * framerate + HOW_MUCH  # Now 30 seconds of animation
+    frames_needed = 25 * framerate + HOW_MUCH  # Now 30 seconds of animation
     step_size = max(int(round(len(images) / frames_needed)), 1)
     print("Amount of raw images: {}".format(len(images_checked)))
     print("Amount of frames available: {}".format(len(images)))
@@ -205,10 +205,10 @@ def main(folder, framerate):
     # Process images (using multiple processes,
     # as 'convert' is single threaded
     print("Starting convert_image for selected images...")
-    #process_map(convert_image, slices, chunksize=1)
-    convert_image(slices[0])
+    process_map(convert_image, slices, chunksize=1)
+    # Only for testing below:
+    # convert_image(slices[0])
 
-    exit(0)
     # Use images for timelapse video
     print("Invoking ffmpeg to process images into video...")
     make_movie(folder, framerate)

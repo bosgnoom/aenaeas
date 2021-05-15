@@ -60,5 +60,5 @@ configs:
       insecure_skip_verify: true
 ```
 
-Gaf een beter resultaat. In de deployment.yaml `image: 192.168.178.15:5000/img_proc:latest` veranderd: de `:latest` was nodig. Hiermee kon de boel gestart worden.
+Gaf een beter resultaat. In deployment.yaml `image: 192.168.178.15:5000/img_proc:latest` veranderd: de `:latest` was nodig. Hiermee kon de boel gestart worden.
 
