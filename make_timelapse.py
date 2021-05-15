@@ -132,7 +132,7 @@ def main(folder, framerate):
 
     # First, evaluate whether the image is ok (not already processed and light enough)
     images_checked = process_map(
-        image_ok, glob.glob('{}/*.jpg'.format(folder)), chunksize=1, max_workers=3)
+        image_ok, glob.glob('{}/*.jpg'.format(folder)), chunksize=1, max_workers=4)
 
     # Now put images to process in a new list
     images = [os.path.split(file) for flag, file in images_checked if flag]
@@ -179,7 +179,7 @@ def main(folder, framerate):
     #     convert_image(slice)
 
     # Multi process, using feedback tqdm
-    process_map(convert_image, slices, chunksize=1, max_workers=3)
+    process_map(convert_image, slices, chunksize=1, max_workers=4)
 
     # Use images for timelapse video
     print("Invoking ffmpeg to process images into video...")
