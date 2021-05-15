@@ -17,7 +17,7 @@
         - PIL
 
     lokaal: 3 sec en 1:46 voor test folder
-    kubes:  8 sec en 
+    kubes:  8 sec en 7:18
 """
 
 # Import modules
@@ -31,8 +31,8 @@ import requests
 HOW_MUCH = 12
 
 # Image processor URL
-IMG_PROC = 'http://192.168.178.202:6000'
-#IMG_PROC = 'http://localhost:8000'  # Run img processor locally
+#IMG_PROC = 'http://192.168.178.202:6000'
+IMG_PROC = 'http://localhost:8000'  # Run img processor locally
 
 
 def image_ok(bestand):
@@ -46,6 +46,7 @@ def image_ok(bestand):
         return False, None
 
     # Check averaged brightness, too low == dark == not OK
+    # TODO: add test or Exception for io errors
     url = '{}/brightness'.format(IMG_PROC)
     image = {'image': open(bestand, 'rb')}
 
@@ -102,11 +103,6 @@ def make_movie(folder, frames):
     command.append(
         '-c:v libx264 -pix_fmt yuv420p -profile:v baseline -level 3.0 -crf 22 -preset veryslow')
     command.append('-c:a aac -strict experimental -movflags +faststart')
-    #command.append('-vcodec libx264 -profile:v high -preset slow')
-    #command.append('-pix_fmt yuv420p')
-    #command.append('-vprofile baseline -movflags +faststart')
-    #command.append('-strict -2')
-    # -acodec aac -b:a 128k')
 
     # Cut video/audio stream by the shortest one
     command.append('-shortest')
@@ -136,7 +132,7 @@ def main(folder, framerate):
 
     # First, evaluate whether the image is ok (not already processed and light enough)
     images_checked = process_map(
-        image_ok, glob.glob('{}/*.jpg'.format(folder)), chunksize=1)
+        image_ok, glob.glob('{}/*.jpg'.format(folder)), chunksize=1, max_workers=3)
 
     # Now put images to process in a new list
     images = [os.path.split(file) for flag, file in images_checked if flag]
@@ -183,7 +179,7 @@ def main(folder, framerate):
     #     convert_image(slice)
 
     # Multi process, using feedback tqdm
-    process_map(convert_image, slices, chunksize=1)
+    process_map(convert_image, slices, chunksize=1, max_workers=3)
 
     # Use images for timelapse video
     print("Invoking ffmpeg to process images into video...")
@@ -193,6 +189,6 @@ def main(folder, framerate):
 
 
 if __name__ == "__main__":
-    main('test', 10)
-    main('img', 20)
+    #main('test', 10)
+    #main('img', 20)
     main('img_cam2', 20)

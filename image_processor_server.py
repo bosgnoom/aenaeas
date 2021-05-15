@@ -90,6 +90,8 @@ def process_images():
 
     # Prepare to send the image back to client
     app.logger.debug('Send image back to client')
+    # Use BytesIO to "write" image to, seek back to start
+    # in order to "read" the file for sending
     img_byte_arr = BytesIO()
     img_avg.save(img_byte_arr, format='PNG')
     img_byte_arr.seek(0)
