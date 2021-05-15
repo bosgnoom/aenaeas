@@ -28,10 +28,10 @@ import requests
 
 
 # How much images to average
-HOW_MUCH = 12
+HOW_MUCH = 10
 
 # Image processor URL
-#IMG_PROC = 'http://192.168.178.202:6000'
+IMG_PROC = 'http://192.168.178.202:6000'
 IMG_PROC = 'http://localhost:8000'  # Run img processor locally
 
 

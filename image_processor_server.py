@@ -27,11 +27,26 @@ app.config['MAX_CONTENT_LENGTH'] = 16 * 1024 * 1024
 def process_image():
     file = request.files['image']
     # Read the image via file.stream
-    img = Image.open(file.stream).convert('L')
-    stat = ImageStat.Stat(img)
-    brightness = stat.mean[0]
+    img = Image.open(file.stream)
 
-    return jsonify({'msg': 'success', 'brightness': brightness})
+    # Try to detect if the image is black and white
+    v = ImageStat.Stat(img).var
+    diff = max(v) - min(v)
+
+    # High values = color image,
+    # Low values (0.0?) = black and white image
+    if diff > 1000:
+        # Color image
+
+        # Now convert to only lightness (L) and
+        # calculate average (=brightness)
+        stat = ImageStat.Stat(img.convert('L'))
+        brightness = stat.mean[0]
+
+        return jsonify({'msg': 'success', 'brightness': brightness})
+        
+    # Always return something
+    return jsonify({'msg': 'success', 'brightness': 0})
 
 
 @app.route("/average", methods=["POST"])
@@ -103,4 +118,4 @@ def process_images():
 
 
 if __name__ == "__main__":
-    app.run(debug=False, host='0.0.0.0', port=8000)
+    app.run(debug=True, host='0.0.0.0', port=8000)
