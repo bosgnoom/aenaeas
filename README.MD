@@ -27,8 +27,8 @@ Dat ziet er goed uit. Nu proberen te starten: `docker run -it testje`. Flask wor
 Ik neem een kijkje in de container: `docker run -it testje /bin/bash`. Nieuwe poging door venv te gebruiken. Pip install werkt nu wel, helaas niet via piwheels. Na een hele lange tijd is de container klaar. Nu start _image_procesor_server_ wel op. Proberen te optimaliseren door een multistage build Dockerfile te maken. Werkte toch niet helemaal goed. Later nog eens opnieuw bekijken. Huidge Dockerfile werkt nu toch met pip.
 
 Docker image naar private registry duwen:
-- docker tag img_proc 192.168.178.15:5000/img_proc
-- docker push 192.168.178.15:5000/img_proc
+- `docker tag img_proc 192.168.178.15:5000/img_proc`
+- `docker push 192.168.178.15:5000/img_proc`
 
 Docker image testrun op rpi3: `docker run -p 8000:8000 img_proc`. In make_timelapse.py IMG_PROC aangepast naar de rpi3: werkt! Nu naar de volgende stap...
 

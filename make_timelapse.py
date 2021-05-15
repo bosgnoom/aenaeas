@@ -15,6 +15,9 @@
         - OpenSans (https://fonts.google.com)
         - tqdm (as pip module)
         - PIL
+
+    lokaal: 3 sec en 1:46 voor test folder
+    kubes:  8 sec en 
 """
 
 # Import modules
@@ -180,7 +183,7 @@ def main(folder, framerate):
     #     convert_image(slice)
 
     # Multi process, using feedback tqdm
-    process_map(convert_image, slices, chunksize=4)
+    process_map(convert_image, slices, chunksize=1)
 
     # Use images for timelapse video
     print("Invoking ffmpeg to process images into video...")
