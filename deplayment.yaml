@@ -29,7 +29,7 @@ spec:
     spec:
       containers:
         - name: img-processor
-          image: 192.168.178.15:5000/img_proc:2
+          image: 192.168.178.15:5000/img_proc:3
           ports:
             - containerPort: 8000
       topologySpreadConstraints:
