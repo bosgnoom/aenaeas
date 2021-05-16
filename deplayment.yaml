@@ -21,7 +21,7 @@ spec:
   selector:
     matchLabels:
       app: img-processor
-  replicas: 3
+  replicas: 5
   template:
     metadata:
       labels:

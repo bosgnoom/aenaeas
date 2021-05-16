@@ -28,11 +28,11 @@ import requests
 
 
 # How much images to average
-HOW_MUCH = 10
+HOW_MUCH = 12
 
 # Image processor URL
 IMG_PROC = 'http://192.168.178.202:6000'
-IMG_PROC = 'http://localhost:8000'  # Run img processor locally
+#IMG_PROC = 'http://localhost:8000'  # Run img processor locally
 
 
 def image_ok(bestand):
@@ -189,6 +189,6 @@ def main(folder, framerate):
 
 
 if __name__ == "__main__":
-    #main('test', 10)
-    #main('img', 20)
-    main('img_cam2', 20)
+    main('test', 10)
+    main('img', 24)
+    main('img_cam2', 24)
