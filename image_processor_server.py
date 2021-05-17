@@ -56,16 +56,16 @@ def process_images():
 
     # Get list of uploaded images
     files = request.files.getlist('image')
-    app.logger.info("Amount of images in list: {}".format(len(files)))
-
+    
     # Get first image's filename
     result_name = files[0].filename
+    app.logger.info("Processing: {}".format(result_name))
+
     # To determine the timestamp, take the first image name and remove its file extension
     timestamp = result_name.split('.')[0]
+
     # Return images as PNG
     result_name = f'{timestamp}.png'
-
-    app.logger.debug('Filename: {}'.format(result_name))
 
     # Empty array to store image
     arr = np.zeros(shape=(720, 1280, 3))
@@ -80,12 +80,12 @@ def process_images():
             # Resize is needed
 
             # First, crop image
-            width, _ = img.size
-            new_height = int((16 * width) / 9)
-            img = img.crop((0, 0, width, new_height))
+            width, _ = img.size      # tuple width, height
+            new_height = int((9 * width) / 16)
+            img_crop = img.crop((0, 0, width, new_height))
 
             # Second, resize image
-            img = img.resize((1280, 720), Image.ANTIALIAS)
+            img = img_crop.resize((1280, 720), Image.ANTIALIAS)
 
         # Stack images
         arr = arr + np.array(img)
