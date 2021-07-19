@@ -25,10 +25,14 @@ import glob
 import os
 from tqdm.contrib.concurrent import process_map
 import requests
+import image_processor_server
 
+
+# Length of timelapse movie
+HOW_LONG = 60    # seconds
 
 # How much images to average
-HOW_MUCH = 12
+HOW_MUCH = 1
 
 # Image processor URL
 IMG_PROC = 'http://192.168.178.202:6000'
@@ -53,7 +57,7 @@ def image_ok(bestand):
     r = requests.post(url, files=image)
 
     brightness = r.json()["brightness"]
-    if brightness < 90:         # 50 is arbitrair gekozen
+    if brightness < 90:         # 90 is arbitrair gekozen
         return False, None
 
     # If all OK:
@@ -101,7 +105,7 @@ def make_movie(folder, frames):
 
     # Set video codec
     command.append(
-        '-c:v libx264 -pix_fmt yuv420p -profile:v baseline -level 3.0 -crf 22 -preset veryslow')
+        '-c:v libx264 -pix_fmt yuv420p -profile:v baseline -level 3.0 -crf 23 -preset veryslow')
     command.append('-c:a aac -strict experimental -movflags +faststart')
 
     # Cut video/audio stream by the shortest one
@@ -143,7 +147,7 @@ def main(folder, framerate):
     # Determine which images to process
     # Make slices for each image to process, each including
     # which images to use in the averaged frame
-    frames_needed = 60 * framerate + HOW_MUCH  # Now 60 seconds of animation
+    frames_needed = HOW_LONG * framerate + HOW_MUCH  # Now 60 seconds of animation
     step_size = max(int(round(len(images) / frames_needed)), 1)
     print("Amount of raw images: {}".format(len(images_checked)))
     print("Amount of frames available: {}".format(len(images)))
@@ -189,6 +193,7 @@ def main(folder, framerate):
 
 
 if __name__ == "__main__":
-    main('test', 10)
+    #main('test', 10)
     #main('img', 24)
     #main('img_cam2', 24)
+    main('img_water', 24)

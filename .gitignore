@@ -9,3 +9,6 @@
 /test
 docker_registry/*
 *.mp4
+/img_water
+/processed_img_water
+

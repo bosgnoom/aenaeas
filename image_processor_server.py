@@ -23,11 +23,10 @@ app = Flask(__name__)
 app.config['MAX_CONTENT_LENGTH'] = 16 * 1024 * 1024
 
 
-@app.route("/brightness", methods=["POST"])
-def process_image():
-    file = request.files['image']
-    # Read the image via file.stream
-    img = Image.open(file.stream)
+def calculate_brightness(img):
+    # Two steps:
+    #  - Is the image black and white?
+    #  - What is the image brightness?
 
     # Try to detect if the image is black and white
     v = ImageStat.Stat(img).var
@@ -42,11 +41,21 @@ def process_image():
         # calculate average (=brightness)
         stat = ImageStat.Stat(img.convert('L'))
         brightness = stat.mean[0]
+        return brightness
 
-        return jsonify({'msg': 'success', 'brightness': brightness})
-        
-    # Always return something
-    return jsonify({'msg': 'success', 'brightness': 0})
+    # Image is black and white, return zero brightness
+    return 0
+
+
+@app.route("/brightness", methods=["POST"])
+def process_image():
+    file = request.files['image']
+    # Read the image via file.stream
+    img = Image.open(file.stream)
+
+    brightness = calculate_brightness(img)
+
+    return jsonify({'msg': 'success', 'brightness': brightness})
 
 
 @app.route("/average", methods=["POST"])
@@ -56,7 +65,7 @@ def process_images():
 
     # Get list of uploaded images
     files = request.files.getlist('image')
-    
+
     # Get first image's filename
     result_name = files[0].filename
     app.logger.info("Processing: {}".format(result_name))
